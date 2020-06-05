@@ -5,20 +5,40 @@ import java.io.*;
 
 public class ServerGreeter extends Thread {
 	//1. Create an object of the ServerSocket class
-
+	ServerSocket ss;
 	public ServerGreeter() throws IOException {
 		//2. Initialize the ServerSocket object. In the parameters,
 		//   you must define the port at which the server will listen for connections.
-		
+		ss = new ServerSocket(8005);
 		//*OPTIONAL* you can set a time limit for the server to wait by using the 
 		//  ServerSocket's setSoTimeout(int timeInMilliSeconds) method
 	}
 
 	public void run() {
 		//3. Create a boolean variable and initialize it to true.
-		
+		boolean check = true;
 		//4. Make a while loop that continues looping as long as the boolean created in the previous step is true.
-			
+			while(check) {
+				try {
+					System.out.println("Waiting for client to connect...");
+					Socket socket = ss.accept();
+					System.out.println("Client has connected!");
+					DataInputStream input = new DataInputStream(socket.getInputStream());
+					input.read();
+					DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+					output.writeUTF("hellow from the server!");
+					socket.close();
+				}
+				catch(SocketTimeoutException ste) {
+					System.out.println("Socket timeout exception");
+					check = false;
+				}
+				catch(IOException io) {
+					System.out.println("IO Exception");
+					check = false;
+				}
+
+			}
 			//5. Make a try-catch block that checks for two types Exceptions: SocketTimeoutException and IOException.
 			//   Put steps 8 - 15 in the try block.
 		
@@ -49,6 +69,14 @@ public class ServerGreeter extends Thread {
 
 	public static void main(String[] args) {
 		//16. In a new thread, create an object of the ServerGreeter class and start the thread. Don't forget the try-catch.
-		
+		Thread r1 = new Thread(()-> {
+			try {
+				new ServerGreeter();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		r1.start();
 	}
 }
